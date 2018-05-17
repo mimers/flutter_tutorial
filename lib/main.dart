@@ -18,11 +18,11 @@ class MyApp extends StatelessWidget {
 class MyAppCounter extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new MyAppState();
+    return new _MyAppState();
   }
 }
 
-class MyAppState extends State<MyAppCounter> {
+class _MyAppState extends State<MyAppCounter> {
   int _count = 0;
 
   increaseCounter() {
