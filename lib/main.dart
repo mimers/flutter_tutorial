@@ -11,11 +11,35 @@ class MyApp extends StatelessWidget {
                 child: new Container(
                     color: const Color(0xFFF1F100),
                     padding: const EdgeInsets.all(20.0),
-                    child: new Text(
-                      'Hello world！',
-                      style: const TextStyle(
-                          color: const Color(0xFF0000FF), fontSize: 30.0),
-                    )))));
+                    child: new MyAppCounter()))));
+  }
+}
+
+class MyAppCounter extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return new MyAppState();
+  }
+}
+
+class MyAppState extends State<MyAppCounter> {
+  int _count = 0;
+
+  increaseCounter() {
+    setState(() {
+      _count++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new GestureDetector(
+      child: new Text(
+        'Hello world！x $_count',
+        style: const TextStyle(color: const Color(0xFF0000FF), fontSize: 30.0),
+      ),
+      onTap: increaseCounter,
+    );
   }
 }
 
