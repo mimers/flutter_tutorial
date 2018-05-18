@@ -1,4 +1,4 @@
-# flutter_tutorial_2
+# flutter_tutorial
 
 A new Flutter application.
 
