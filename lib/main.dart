@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -24,11 +25,22 @@ class MyAppCounter extends StatefulWidget {
 
 class _MyAppState extends State<MyAppCounter> {
   int _count = 0;
+  static const String COUNTER_KEY = 'counter';
 
-  increaseCounter() {
-    setState(() {
-      _count++;
-    });
+  _MyAppState() {
+    init();
+  }
+
+  init() async {
+    var pref = await SharedPreferences.getInstance();
+    _count = pref.getInt(COUNTER_KEY) ?? 0;
+    setState(() {});
+  }
+
+  increaseCounter() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setInt(COUNTER_KEY, ++_count);
+    setState(() {});
   }
 
   @override
