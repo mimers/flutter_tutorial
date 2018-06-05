@@ -1,19 +1,42 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+VoidCallback _handleMetricsChanged;
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Container(
-            color: const Color(0xFFFFFFFF),
-            child: new Center(
-                child: new Container(
-                    color: const Color(0xFFF1F100),
-                    padding: const EdgeInsets.all(20.0),
-                    child: new MyAppCounter()))));
+    return StatefulBuilder(
+      builder: (context, setState) {
+        if (_handleMetricsChanged == null) {
+          _handleMetricsChanged = ui.window.onMetricsChanged;
+        }
+        ui.window.onMetricsChanged = () {
+          _handleMetricsChanged();
+          setState(() {});
+        };
+        return new Directionality(
+            textDirection: TextDirection.ltr,
+            child: Container(
+              color: const Color(0xFF3333FF),
+              padding: EdgeInsets.only(top: ui.window.padding.top / ui.window.devicePixelRatio),
+              child: new Container(
+                  color: const Color(0xFFFFA3A3),
+                  child: new Center(
+                      child: new Container(
+                          color: const Color(0xFF313100),
+                          padding: const EdgeInsets.all(20.0),
+                          child: new MyAppCounter()))),
+            ));
+      },
+    );
   }
+}
+
+void main() {
+  runApp(new MyApp());
 }
 
 class MyAppCounter extends StatefulWidget {
@@ -53,8 +76,4 @@ class _MyAppState extends State<MyAppCounter> {
       onTap: increaseCounter,
     );
   }
-}
-
-void main() {
-  runApp(new MyApp());
 }
