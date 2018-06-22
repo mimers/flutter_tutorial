@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,9 +27,52 @@ class MyApp extends StatelessWidget {
                   color: const Color(0xFFFFA3A3),
                   child: new Center(
                       child: new Container(
-                          color: const Color(0xFF313100),
-                          padding: const EdgeInsets.all(20.0),
-                          child: new MyAppCounter()))),
+                          color: const Color(0xFFA1A100),
+                          child: new Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              MyAppCounter(),
+                              new Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: RaisedButton(
+                                    onPressed: () {
+                                      print('start eval js');
+                                      var v = ui.window.evalJavaScript(
+                                          '(function(){var rc = parseInt(ts)+1;'
+                                          'ts = rc;'
+                                          'if (rc%2==0) return rc;'
+                                          'if (rc%3==0) return "hello";'
+                                          'return true;})()',
+                                          'returnValue.js');
+                                      print("$v @ ${v.runtimeType}");
+                                    },
+                                    child: Text('script return value')),
+                              ),
+                              new Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: RaisedButton(
+                                  onPressed: () {
+                                    ui.window.execJavaScript(
+                                        'throw new Error(\'throwing a error ${DateTime.now().toIso8601String()}\');',
+                                        'exp.js');
+                                  },
+                                  child: Text('throw js exception'),
+                                ),
+                              ),
+                              new Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: RaisedButton(
+                                  onPressed: () {
+                                    var n = DateTime.now().millisecond.toDouble();
+                                    var r = ui.window.invokeMethod('', 'isOdd', n);
+                                    print("$n is Odd: $r");
+                                  },
+                                  child: Text('invoke method'),
+                                ),
+                              )
+                            ],
+                          )))),
             ));
       },
     );
@@ -36,6 +80,7 @@ class MyApp extends StatelessWidget {
 }
 
 void main() {
+  print("window defalut route:${ui.window.defaultRouteName}");
   runApp(new MyApp());
 }
 
@@ -62,18 +107,40 @@ class _MyAppState extends State<MyAppCounter> {
 
   increaseCounter() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setInt(COUNTER_KEY, ++_count);
+    pref.setInt(COUNTER_KEY, _count++);
+    print('jsc function return: ');
+    print(ui.window.invokeMethod('', 'getTG', ""));
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      child: new Text(
-        'Hello world！x $_count',
-        style: const TextStyle(color: const Color(0xFF0000FF), fontSize: 30.0),
+    ui.window
+        .execJavaScript("function isOdd(a) { return Math.ceil(a)%2==1; }; function getTG() { return tg; };", "init.js");
+    ui.window.setGlobalVariable("tg", DateTime.now().second.toDouble());
+    ui.window.setGlobalVariable(
+        'ts',
+        "${DateTime
+            .now()
+            .millisecondsSinceEpoch}");
+    ui.window.addJavaScriptInterface('dart_window', (argument) {
+      print("call from JavaScript $argument");
+      return "$argument _ ${DateTime
+          .now()
+          .millisecond}";
+    });
+    return new RaisedButton(
+      onPressed: increaseCounter,
+      child: new Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: new Text(
+          'Hello, world（！x $_count）',
+          style: const TextStyle(color: const Color(0xFF0000FF), fontSize: 20.0),
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-      onTap: increaseCounter,
     );
   }
 }
